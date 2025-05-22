@@ -12,9 +12,12 @@ class PrologEngine:
     def cargar_resultados(self, data):
         print("⚙️ Cargando calificaciones al motor Prolog...")
         total = 0
-        for row in data:
+        for i, row in enumerate(data):
             try:
-                print("Insertando:", row)  # <-- Depuración
+                if i < 10:  # Solo imprime los primeros 10
+                    print("Insertando:", row)
+                elif i == 10:
+                    print("...")  # Indica que hay más
                 cmd = (
                     f"agregar_calificacion({row['Edad']}, {row['Estrato']}, "
                     f"'{row['Carrera'].lower()}', '{row['Genero'].lower()}', "
