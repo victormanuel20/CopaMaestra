@@ -84,15 +84,7 @@ class CoctelController:
 
             sabor = row['Flavor'] if pd.notna(row['Flavor']) else "Desconocido"
 
-            print(f"\n🧾 Información completa del cóctel ID {id_coctel}:")
-            print(f"• Nombre: {nombre}")
-            print(f"• Imagen URL: {imagen}")
-            print(f"• Instrucciones: {instrucciones}")
-            print(f"• Ingredientes y Medidas:")
-            for ing, med in zip(ingredientes, medidas):
-                print(f"   - {ing}: {med}")
-            print(f"• Sabor: {sabor}")
-
+            # Quita los prints aquí, solo retorna el diccionario
             return {
                 'nombre': nombre,
                 'instrucciones': instrucciones,

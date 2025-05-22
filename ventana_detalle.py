@@ -8,7 +8,7 @@ class VentanaDetalle:
     def __init__(self, datos_coctel):
         self.ventana = ttk.Toplevel()
         self.ventana.title(f"🍸 {datos_coctel['nombre']} - Detalles")
-        self.ventana.geometry("700x600")  # Ventana un poco más grande
+        self.ventana.geometry("800x700")  # Ventana más grande
         self.ventana.resizable(False, False)
         self.ventana.lift()
         self.ventana.focus_force()
@@ -44,7 +44,7 @@ class VentanaDetalle:
 
         # Instrucciones
         ttk.Label(self.ventana, text="📋 Instrucciones:", font=("Helvetica", 12, "bold")).pack(pady=(10, 2))
-        ttk.Label(self.ventana, text=datos_coctel['instrucciones'], wraplength=650, justify="center").pack()
+        ttk.Label(self.ventana, text=datos_coctel['instrucciones'], wraplength=750, justify="center").pack()
 
         # Ingredientes y medidas
         ttk.Label(self.ventana, text="🍸 Ingredientes:", font=("Helvetica", 12, "bold")).pack(pady=(10, 2))
