@@ -4,7 +4,7 @@ from interface import PrologEngine
 class CoctelController:
     def __init__(self, view):
         self.view = view
-        self.engine = PrologEngine()
+        self.engine = PrologEngine("motor.pl")  # ← Especificamos el archivo del motor Prolog
         self.data_calificaciones = None
         self.data_cocktails = None
         self.ids_recomendados = []  # ← aquí guardamos la inferencia
@@ -32,7 +32,7 @@ class CoctelController:
             print("✔️ Datos cargados correctamente.")
             # 🔁 Cargar hechos en el motor Prolog
             self.engine.cargar_resultados(self.data_calificaciones.to_dict(orient="records"))
-            
+            self.engine.mostrar_todos_los_hechos(n=10)  # <-- Aquí llamas para ver los hechos cargados
           
     """
     def recomendar_cocteles(self, datos_usuario):
@@ -120,8 +120,9 @@ class CoctelController:
         print("\n📋 Nombres de cócteles recomendados:")
         for id_ in self.ids_recomendados:
             try:
-                datos = self.obtener_datos_coctel(id_)
-                print(f"🍸 ID {id_}: {datos['nombre']}")
+                row = self.data_cocktails[self.data_cocktails['id'] == id_].iloc[0]
+                nombre = row['Drink']
+                print(f"🍸 ID {id_}: {nombre}")
             except Exception as e:
                 print(f"❌ Error al obtener nombre para ID {id_}: {e}")
 
