@@ -1,79 +1,103 @@
-% -------------------------------
-% DEFINICIONES DINÁMICAS
-% -------------------------------
+% --------------------------
+% motor.pl – Sistema Experto de Cócteles
+% --------------------------
 
 :- dynamic calificacion/6.
 
-% -------------------------------
-% INSERCIÓN DESDE PYTHON
-% -------------------------------
+% Hecho: calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion).
+agregar_calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion) :-
+    assertz(calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion)).
 
-agregar_calificacion(Edad, Estrato, Carrera, Genero, CoctelID, Calificacion) :-
-    assertz(calificacion(Edad, Estrato, Carrera, Genero, CoctelID, Calificacion)).
+% --------------------------------
+% Coincidencias según nivel
+% --------------------------------
 
-% -------------------------------
-% REGLAS DE COINCIDENCIA
-% -------------------------------
+% Coincidencia 1: exacta
+usuario_match1(Edad, Estrato, Carrera, Genero, Id, Cal) :-
+    calificacion(Edad, Estrato, Carrera, Genero, Id, Cal).
 
-% Coincidencia exacta
-usuario_match_1(Edad, Estrato, Carrera, Genero, Id) :-
-    calificacion(Edad, Estrato, Carrera, Genero, Id, _).
+% Coincidencia 2: misma carrera y género, edad ±5, estrato ±2
+usuario_match2(EdadU, EstratoU, Carrera, Genero, Id, Cal) :-
+    calificacion(Edad, Estrato, Carrera, Genero, Id, Cal),
+    abs(Edad - EdadU) =< 5,
+    abs(Estrato - EstratoU) =< 2.
 
-% Coincidencia con rango en edad y estrato
-usuario_match_2(EdadU, EstratoU, Carrera, Genero, Id) :-
-    calificacion(E, Es, Carrera, Genero, Id, _),
-    abs(E - EdadU) =< 5,
-    abs(Es - EstratoU) =< 2.
+% Coincidencia 3: solo género, edad ±5, estrato ±2
+usuario_match3(EdadU, EstratoU, _, Genero, Id, Cal) :-
+    calificacion(Edad, Estrato, _, Genero, Id, Cal),
+    abs(Edad - EdadU) =< 5,
+    abs(Estrato - EstratoU) =< 2.
 
-% Coincidencia ignorando carrera
-usuario_match_3(EdadU, EstratoU, Genero, Id) :-
-    calificacion(E, Es, _, Genero, Id, _),
-    abs(E - EdadU) =< 5,
-    abs(Es - EstratoU) =< 2.
+% --------------------------------
+% Ponderación por calificación
+% --------------------------------
 
-% -------------------------------
-% SUMA DE PUNTAJES POR CÓCTEL
-% -------------------------------
+peso_match1(5, 1).
+peso_match1(4, 0.5).
+peso_match1(3, 0).
+peso_match1(2, -0.5).
+peso_match1(1, -1).
 
-% Acumula los puntajes de coincidencia
-recolectar_puntajes(Edad, Estrato, Carrera, Genero, ListaPuntos) :-
-    findall(Id, usuario_match_1(Edad, Estrato, Carrera, Genero, Id), Match1),
-    findall(Id, usuario_match_2(Edad, Estrato, Carrera, Genero, Id), Match2),
-    findall(Id, usuario_match_3(Edad, Estrato, Genero, Id), Match3),
+peso_match2(5, 0.5).
+peso_match2(4, 0.2).
+peso_match2(3, 0).
+peso_match2(2, -0.2).
+peso_match2(1, -0.5).
 
-    contar_puntajes(Match1, 1.0, [], P1),
-    contar_puntajes(Match2, 0.5, P1, P2),
-    contar_puntajes(Match3, 0.2, P2, ListaPuntos).
+peso_match3(5, 0.2).
+peso_match3(4, 0.1).
+peso_match3(3, 0).
+peso_match3(2, -0.1).
+peso_match3(1, -0.2).
 
-% Recorre lista y suma pesos
-contar_puntajes([], _, Acc, Acc).
-contar_puntajes([Id|Resto], Peso, Acc, Resultado) :-
-    actualizar(Id, Peso, Acc, NuevoAcc),
-    contar_puntajes(Resto, Peso, NuevoAcc, Resultado).
+% --------------------------------
+% Sumar pesos por cóctel
+% --------------------------------
 
-% Si ya existe el ID, suma el peso
-actualizar(Id, Peso, [], [Peso-Id]).
-actualizar(Id, Peso, [P0-Id|T], [P1-Id|T]) :- 
-    P1 is P0 + Peso.
+% Match 1
+sumar_pesos_match1(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
+    findall(P, (usuario_match1(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match1(Cal, P)), Pesos),
+    sumlist(Pesos, PesoTotal).
 
-% Si no existe, lo deja pasar
-actualizar(Id, Peso, [P0-Id0|T], [P0-Id0|Resto]) :- 
-    Id \= Id0, 
-    actualizar(Id, Peso, T, Resto).
+% Match 2
+sumar_pesos_match2(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
+    findall(P, (usuario_match2(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match2(Cal, P)), Pesos),
+    sumlist(Pesos, PesoTotal).
 
-% -------------------------------
-% INFERENCIA FINAL
-% -------------------------------
+% Match 3
+sumar_pesos_match3(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
+    findall(P, (usuario_match3(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match3(Cal, P)), Pesos),
+    sumlist(Pesos, PesoTotal).
 
-% Recomendación ordenada
-recomendar_cocteles(Edad, Estrato, Carrera, Genero, ListaTop) :-
-    recolectar_puntajes(Edad, Estrato, Carrera, Genero, Lista),
-    sort(Lista, Ordenada),         
-    reverse(Ordenada, Desc),       
-    extraer_top(Desc, ListaTop).
+% --------------------------------
+% Acumulación total por cóctel
+% --------------------------------
 
-% Extrae los 3 mejores
+puntaje_total(Edad, Estrato, Carrera, Genero, Id, Puntaje) :-
+    sumar_pesos_match1(Edad, Estrato, Carrera, Genero, Id, P1),
+    sumar_pesos_match2(Edad, Estrato, Carrera, Genero, Id, P2),
+    sumar_pesos_match3(Edad, Estrato, Carrera, Genero, Id, P3),
+    Puntaje is P1 + P2 + P3.
+
+% Obtener todos los IDs únicos con algún match
+coctel_posible(Id) :-
+    calificacion(_, _, _, _, Id, _).
+
+% Recolectar puntajes
+recolectar_puntajes(Edad, Estrato, Carrera, Genero, Lista) :-
+    setof(Puntaje-Id, (coctel_posible(Id), puntaje_total(Edad, Estrato, Carrera, Genero, Id, Puntaje)), ListaOrdenada),
+    reverse(ListaOrdenada, ListaDesc),
+    extraer_top(ListaDesc, Lista).
+
+% Extraer top 3
 extraer_top([], []).
 extraer_top([_-Id1], [Id1]).
 extraer_top([_-Id1, _-Id2], [Id1, Id2]).
 extraer_top([_-Id1, _-Id2, _-Id3|_], [Id1, Id2, Id3]).
+
+% --------------------------------
+% Regla principal
+% --------------------------------
+
+recomendar_cocteles(Edad, Estrato, Carrera, Genero, ListaTop) :-
+    recolectar_puntajes(Edad, Estrato, Carrera, Genero, ListaTop).
