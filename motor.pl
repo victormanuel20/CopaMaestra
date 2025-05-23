@@ -85,7 +85,11 @@ coctel_posible(Id) :-
 
 % Recolectar puntajes
 recolectar_puntajes(Edad, Estrato, Carrera, Genero, Lista) :-
-    setof(Puntaje-Id, (coctel_posible(Id), puntaje_total(Edad, Estrato, Carrera, Genero, Id, Puntaje)), ListaOrdenada),
+    setof(
+        Puntaje-Id, 
+        (coctel_posible(Id), puntaje_total(Edad, Estrato, Carrera, Genero, Id, Puntaje)), 
+        ListaOrdenada
+    ),
     reverse(ListaOrdenada, ListaDesc),
     extraer_top(ListaDesc, Lista).
 
