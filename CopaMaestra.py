@@ -10,7 +10,7 @@ usuario_data = {
     'genero': None
 }
 
-class VistaPrincipal:
+class CopaMaestra:
     def __init__(self, controller):
         self.controller = controller
         self.root = tk.Tk()

@@ -4,7 +4,7 @@
 
 :- dynamic calificacion/6.
 
-Comentario : Aqui se insertan los hechos de calificaciones de cócteles.
+%Comentario : Aqui se insertan los hechos de calificaciones de cócteles.
 
 % Hecho: calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion).
 agregar_calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion) :-
@@ -36,7 +36,7 @@ usuario_match3(EdadU, EstratoU, _, Genero, Id, Cal) :-
 % Ponderación por calificación
 % --------------------------------
 
-Son pesos que se asignan a cada calificación segun el match. Por ejemplo, si la calificación es 5 en el match 1, el peso es 1, si es 4, el peso es 0.5, y así sucesivamente.
+%Son pesos que se asignan a cada calificación segun el match. Por ejemplo, si la calificación es 5 en el match 1, el peso es 1, si es 4, el peso es 0.5, y así sucesivamente.
 
 peso_match1(5, 1).
 peso_match1(4, 0.5).
@@ -60,24 +60,29 @@ peso_match3(1, -0.2).
 % Sumar pesos por cóctel
 % --------------------------------
 
+%Comentario: Sumar puntajes por cóctel. Se utiliza findall para recolectar todos los puntajes 
+% es decir lo que hace es lo siguiente. obtiene en una lista los puntajes de cada coctel que 
 % Match 1
 sumar_pesos_match1(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
-    findall(P, (usuario_match1(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match1(Cal, P)), Pesos),
-    sumlist(Pesos, PesoTotal).
+    findall(P, (usuario_match1(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match1(Cal, P)), ListaPuntajes),
+    sumlist(ListaPuntajes, PesoTotal).
 
 % Match 2
 sumar_pesos_match2(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
-    findall(P, (usuario_match2(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match2(Cal, P)), Pesos),
-    sumlist(Pesos, PesoTotal).
+    findall(P, (usuario_match2(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match2(Cal, P)), ListaPuntajes),
+    sumlist(ListaPuntajes, PesoTotal).
 
 % Match 3
 sumar_pesos_match3(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
-    findall(P, (usuario_match3(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match3(Cal, P)), Pesos),
-    sumlist(Pesos, PesoTotal).
+    findall(P, (usuario_match3(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match3(Cal, P)), ListaPuntajes),
+    sumlist(ListaPuntajes, PesoTotal).
 
 % --------------------------------
 % Acumulación total por cóctel
 % --------------------------------
+
+%Comentario: Sumar los puntajes de los tres matches para obtener un puntaje total por cóctel.
+% Se utiliza la suma de los pesos de cada match para calcular el puntaje total.
 
 puntaje_total(Edad, Estrato, Carrera, Genero, Id, Puntaje) :-
     sumar_pesos_match1(Edad, Estrato, Carrera, Genero, Id, P1),

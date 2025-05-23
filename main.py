@@ -1,8 +1,8 @@
 from controller import CoctelController
-from vista import VistaPrincipal
+from CopaMaestra import CopaMaestra
 
 if __name__ == "__main__":
-    vista = VistaPrincipal(None)
+    vista = CopaMaestra(None)
     controlador = CoctelController(vista)
     vista.controller = controlador
     vista.iniciar()

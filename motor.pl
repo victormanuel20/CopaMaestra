@@ -56,18 +56,18 @@ peso_match3(1, -0.2).
 
 % Match 1
 sumar_pesos_match1(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
-    findall(P, (usuario_match1(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match1(Cal, P)), Pesos),
-    sumlist(Pesos, PesoTotal).
+    findall(P, (usuario_match1(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match1(Cal, P)), ListaPuntajes),
+    sumlist(ListaPuntajes, PesoTotal).
 
 % Match 2
 sumar_pesos_match2(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
-    findall(P, (usuario_match2(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match2(Cal, P)), Pesos),
-    sumlist(Pesos, PesoTotal).
+    findall(P, (usuario_match2(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match2(Cal, P)), ListaPuntajes),
+    sumlist(ListaPuntajes, PesoTotal).
 
 % Match 3
 sumar_pesos_match3(Edad, Estrato, Carrera, Genero, Id, PesoTotal) :-
-    findall(P, (usuario_match3(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match3(Cal, P)), Pesos),
-    sumlist(Pesos, PesoTotal).
+    findall(P, (usuario_match3(Edad, Estrato, Carrera, Genero, Id, Cal), peso_match3(Cal, P)), ListaPuntajes),
+    sumlist(ListaPuntajes, PesoTotal).
 
 % --------------------------------
 % Acumulación total por cóctel
