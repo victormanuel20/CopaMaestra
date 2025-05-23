@@ -118,7 +118,6 @@ class CopaMaestra:
         ids = self.controller.recomendar_cocteles(usuario_data)
         # 👉 Imprimir nombres de los cócteles en consola
         
-        self.controller.mostrar_todos_los_nombres()
         VentanaResultado(self.controller, ids)
 
 

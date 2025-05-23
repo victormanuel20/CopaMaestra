@@ -1,9 +1,8 @@
 import pandas as pd
-from interface import PrologEngine
+from PrologEngine import PrologEngine
 
 class CoctelController:
-    def __init__(self, view):
-        self.view = view
+    def __init__(self):
         self.engine = PrologEngine("motor.pl")  # ← Especificamos el archivo del motor Prolog
         self.data_calificaciones = None
         self.data_cocktails = None
@@ -31,7 +30,7 @@ class CoctelController:
         else:
             print("✔️ Datos cargados correctamente.")
             # 🔁 Cargar hechos en el motor Prolog
-            self.engine.cargar_resultados(self.data_calificaciones.to_dict(orient="records"))
+            self.engine.cargar_datos(self.data_calificaciones.to_dict(orient="records"))
             self.engine.mostrar_todos_los_hechos(n=10)  # <-- Aquí llamas para ver los hechos cargados
           
     """
@@ -104,27 +103,3 @@ class CoctelController:
                 'medidas': [],
                 'sabor': "Desconocido"
             }
-
-
-
-
-    def mostrar_todos_los_nombres(self):
-        print("\n📋 Nombres de cócteles recomendados:")
-        for id_ in self.ids_recomendados:
-            try:
-                row = self.data_cocktails[self.data_cocktails['id'] == id_].iloc[0]
-                nombre = row['Drink']
-                print(f"🍸 ID {id_}: {nombre}")
-            except Exception as e:
-                print(f"❌ Error al obtener nombre para ID {id_}: {e}")
-
-
-
-    
-    
-"""
-cuando este listo como tal ya el metodo todo se  paso esto y listo lo anterior es de prueba
-def recomendar_cocteles(self, datos_usuario):
-    return self.engine.recomendar_cocteles(datos_usuario)
-
-"""

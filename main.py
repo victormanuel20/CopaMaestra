@@ -3,6 +3,6 @@ from CopaMaestra import CopaMaestra
 
 if __name__ == "__main__":
     vista = CopaMaestra(None)
-    controlador = CoctelController(vista)
+    controlador = CoctelController()
     vista.controller = controlador
     vista.iniciar()

@@ -5,19 +5,15 @@ class PrologEngine:
         self.prolog = Prolog()
         try:
             self.prolog.consult(path)
-            print(f"✅ Motor Prolog cargado desde: {path}")
+
         except Exception as e:
             print(f"⚠️ No se pudo cargar el motor Prolog: {e}")
 
-    def cargar_resultados(self, data):
+    def cargar_datos(self, data):
         print("⚙️ Cargando calificaciones al motor Prolog...")
         total = 0
         for i, row in enumerate(data):
             try:
-                if i < 10:  # Solo imprime los primeros 10
-                    print("Insertando:", row)
-                elif i == 10:
-                    print("...")  # Indica que hay más
                 cmd = (
                     f"agregar_calificacion({row['Edad']}, {row['Estrato']}, "
                     f"'{row['Carrera'].lower()}', '{row['Genero'].lower()}', "
@@ -31,13 +27,6 @@ class PrologEngine:
                 print("➡️ Row fallida:", row)
         print(f"📌 Hechos cargados en Prolog: {total}")
 
-    """
-    def recomendar_cocteles(self, datos_usuario):
-        print("🧠 Ejecutando consulta en Prolog (simulada por ahora)...")
-        print(f"📥 Entrada del usuario: {datos_usuario}")
-        return [17222, 13501, 17225]  # ✅ Estos sí son IDs reales de cócteles
-
-    """
     
     def recomendar_cocteles(self, datos_usuario):
         try:
