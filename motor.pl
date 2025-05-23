@@ -1,75 +1,79 @@
-% Hecho dinámico
+% -------------------------------
+% DEFINICIONES DINÁMICAS
+% -------------------------------
+
 :- dynamic calificacion/6.
 
-% Inserción de hechos desde Python
-agregar_calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion) :-
-    assertz(calificacion(Edad, Estrato, Carrera, Genero, IdCoctel, Calificacion)).
+% -------------------------------
+% INSERCIÓN DESDE PYTHON
+% -------------------------------
+
+agregar_calificacion(Edad, Estrato, Carrera, Genero, CoctelID, Calificacion) :-
+    assertz(calificacion(Edad, Estrato, Carrera, Genero, CoctelID, Calificacion)).
+
+% -------------------------------
+% REGLAS DE COINCIDENCIA
+% -------------------------------
 
 % Coincidencia exacta
-usuario_match(Edad, Estrato, Carrera, Genero, Id, Cal) :-
-    calificacion(Edad, Estrato, Carrera, Genero, Id, Cal).
+usuario_match_1(Edad, Estrato, Carrera, Genero, Id) :-
+    calificacion(Edad, Estrato, Carrera, Genero, Id, _).
 
-% Relaja estrato y edad
-usuario_match(Edad, Estrato, Carrera, Genero, Id, Cal) :-
-    calificacion(E, Es, Carrera, Genero, Id, Cal),
-    abs(E - Edad) =< 5,
-    abs(Es - Estrato) =< 2.
+% Coincidencia con rango en edad y estrato
+usuario_match_2(EdadU, EstratoU, Carrera, Genero, Id) :-
+    calificacion(E, Es, Carrera, Genero, Id, _),
+    abs(E - EdadU) =< 5,
+    abs(Es - EstratoU) =< 2.
 
-% Relaja carrera
-usuario_match(Edad, Estrato, _, Genero, Id, Cal) :-
-    calificacion(E, Es, _, Genero, Id, Cal),
-    abs(E - Edad) =< 5,
-    abs(Es - Estrato) =< 2.
+% Coincidencia ignorando carrera
+usuario_match_3(EdadU, EstratoU, Genero, Id) :-
+    calificacion(E, Es, _, Genero, Id, _),
+    abs(E - EdadU) =< 5,
+    abs(Es - EstratoU) =< 2.
 
-% Relaja género
-usuario_match(Edad, Estrato, _, _, Id, Cal) :-
-    calificacion(E, Es, _, _, Id, Cal),
-    abs(E - Edad) =< 5,
-    abs(Es - Estrato) =< 2.
+% -------------------------------
+% SUMA DE PUNTAJES POR CÓCTEL
+% -------------------------------
 
-% Promedio por cóctel
-promedio_coctel_robusto(Edad, Estrato, Carrera, Genero, Id, Promedio) :-
-    findall(Cal, usuario_match(Edad, Estrato, Carrera, Genero, Id, Cal), Calificaciones),
-    Calificaciones \= [],
-    sumlist(Calificaciones, Total),
-    length(Calificaciones, N),
-    Promedio is Total / N.
+% Acumula los puntajes de coincidencia
+recolectar_puntajes(Edad, Estrato, Carrera, Genero, ListaPuntos) :-
+    findall(Id, usuario_match_1(Edad, Estrato, Carrera, Genero, Id), Match1),
+    findall(Id, usuario_match_2(Edad, Estrato, Carrera, Genero, Id), Match2),
+    findall(Id, usuario_match_3(Edad, Estrato, Genero, Id), Match3),
 
-% Promedio general (si no hay nada)
-promedio_general(Id, Promedio) :-
-    findall(Cal, calificacion(_, _, _, _, Id, Cal), Calificaciones),
-    Calificaciones \= [],
-    sumlist(Calificaciones, Total),
-    length(Calificaciones, N),
-    Promedio is Total / N.
+    contar_puntajes(Match1, 1.0, [], P1),
+    contar_puntajes(Match2, 0.5, P1, P2),
+    contar_puntajes(Match3, 0.2, P2, ListaPuntos).
 
-% Recolectar lista de cócteles con sus promedios (robusto)
-recolectar_robusto(Edad, Estrato, Carrera, Genero, Lista) :-
-    setof(Prom-Id, (promedio_coctel_robusto(Edad, Estrato, Carrera, Genero, Id, Prom), number(Id)), ListaNoOrdenada),
-    reverse(ListaNoOrdenada, ListaOrdenada),
-    extraer_top(ListaOrdenada, Lista), !.
-recolectar_robusto(_, _, _, _, Lista) :-
-    setof(Prom-Id, (promedio_general(Id, Prom), number(Id)), ListaNoOrdenada),
-    reverse(ListaNoOrdenada, ListaOrdenada),
-    extraer_top(ListaOrdenada, Lista), !.
-recolectar_robusto(_, _, _, _, Lista) :-
-    findall(Id, (calificacion(_, _, _, _, Id, _), number(Id)), TodosIds),
-    random_permutation(TodosIds, Aleatorios),
-    extraer_top_ids(Aleatorios, Lista), !.
-recolectar_robusto(_, _, _, _, []).
+% Recorre lista y suma pesos
+contar_puntajes([], _, Acc, Acc).
+contar_puntajes([Id|Resto], Peso, Acc, Resultado) :-
+    actualizar(Id, Peso, Acc, NuevoAcc),
+    contar_puntajes(Resto, Peso, NuevoAcc, Resultado).
 
-% Tomar los mejores 3 de una lista ordenada Prom-Id
+% Si ya existe el ID, suma el peso
+actualizar(Id, Peso, [], [Peso-Id]).
+actualizar(Id, Peso, [P0-Id|T], [P1-Id|T]) :- 
+    P1 is P0 + Peso.
+
+% Si no existe, lo deja pasar
+actualizar(Id, Peso, [P0-Id0|T], [P0-Id0|Resto]) :- 
+    Id \= Id0, 
+    actualizar(Id, Peso, T, Resto).
+
+% -------------------------------
+% INFERENCIA FINAL
+% -------------------------------
+
+% Recomendación ordenada
+recomendar_cocteles(Edad, Estrato, Carrera, Genero, ListaTop) :-
+    recolectar_puntajes(Edad, Estrato, Carrera, Genero, Lista),
+    sort(Lista, Ordenada),         
+    reverse(Ordenada, Desc),       
+    extraer_top(Desc, ListaTop).
+
+% Extrae los 3 mejores
 extraer_top([], []).
 extraer_top([_-Id1], [Id1]).
 extraer_top([_-Id1, _-Id2], [Id1, Id2]).
 extraer_top([_-Id1, _-Id2, _-Id3|_], [Id1, Id2, Id3]).
-
-% Tomar los primeros 3 de una lista simple de IDs
-extraer_top_ids([], []).
-extraer_top_ids([Id1], [Id1]).
-extraer_top_ids([Id1, Id2], [Id1, Id2]).
-extraer_top_ids([Id1, Id2, Id3|_], [Id1, Id2, Id3]).
-
-% Inferencia principal
-recomendar_cocteles(Edad, Estrato, Carrera, Genero, ListaTop) :-
-    recolectar_robusto(Edad, Estrato, Carrera, Genero, ListaTop).
